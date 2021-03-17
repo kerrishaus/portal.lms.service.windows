@@ -21,11 +21,22 @@ namespace windows_service.lms.portal.kunindustries.com
         {
             InitializeComponent();
 
-            if (!System.Diagnostics.EventLog.SourceExists(LogSource))
+            eventLog1 = new System.Diagnostics.EventLog();
+
+            // Turn off autologging
+            this.AutoLog = false;
+
+            // create an event source, specifying the name of a log that
+            // does not currently exist to create a new, custom log
+            if (!System.Diagnostics.EventLog.SourceExists("Portal_LMS_Service_Source"))
             {
-                System.Diagnostics.EventLog.CreateEventSource(LogSource, "");
+                System.Diagnostics.EventLog.CreateEventSource(
+                    "Portal_LMS_Service_Source", "ServiceLog");
             }
-            eventLog1.WriteEntry("Portal LMS Service created.");
+
+            // configure the event log instance to use this source name
+            eventLog1.Source = "Portal_LMS_Service_Source";
+            eventLog1.Log = "ServiceLog";
         }
 
         protected override void OnStart(string[] args)
