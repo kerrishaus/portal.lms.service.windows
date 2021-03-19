@@ -8,14 +8,17 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Windows;
+using System.Windows;
+
 
 namespace windows_service.lms.portal.kunindustries.com
 {
     public partial class PortalLMSSevice : ServiceBase
     {
         Timer serviceTimer = new Timer();
-
-        String LogSource = "Portal_LMS_Source";
 
         public PortalLMSSevice()
         {
@@ -58,7 +61,7 @@ namespace windows_service.lms.portal.kunindustries.com
                 if (serviceTimer != null)
                 {
                     serviceTimer.AutoReset = true;
-                    serviceTimer.Interval = Convert.ToDouble(60 * 1000);
+                    serviceTimer.Interval = Convert.ToDouble(30 * 1000);
                     serviceTimer.Enabled = true;
                     serviceTimer.Elapsed += serviceTimer_Elapsed;
                     eventLog1.WriteEntry("Portal LMS Service Timer Initialized", EventLogEntryType.Information);
@@ -72,8 +75,38 @@ namespace windows_service.lms.portal.kunindustries.com
 
         protected void serviceTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            //Your Functionality
-            eventLog1.WriteEntry("Elapsed Event Called", EventLogEntryType.Information);
+            sendStatusToAPI();
+        }
+
+        protected void sendStatusToAPI()
+        {
+            const string URL = "https://api.kunindustries.com/portal/lms/class/attendance/status.php";
+            string urlParameters = "?classid=7&userid=14&status=0";
+
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(URL);
+
+            // Add an Accept header for JSON format.
+            client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json"));
+
+            // List data response.
+            HttpResponseMessage response = client.GetAsync(urlParameters).Result;  // Blocking call! Program will wait here until a response is received or a timeout occurs.
+            if (response.IsSuccessStatusCode)
+            {
+                // Parse the response body.
+                var dataObjects = response.Content.ReadAsStringAsync().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
+                eventLog1.WriteEntry("Sent status to server.", EventLogEntryType.Information);
+            }
+            else
+            {
+                eventLog1.WriteEntry("Failed to sent status to server: (" + response.StatusCode + ") " + response.ReasonPhrase, EventLogEntryType.Error);
+            }
+
+            // Make any other calls using HttpClient here.
+
+            // Dispose once all HttpClient calls are complete. This is not necessary if the containing object will be disposed of; for example in this case the HttpClient instance will be disposed automatically when the application terminates so the following call is superfluous.
+            client.Dispose();
         }
 
         private void eventLog1_EntryWritten(object sender, EntryWrittenEventArgs e)

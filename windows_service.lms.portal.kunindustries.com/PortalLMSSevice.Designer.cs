@@ -45,6 +45,7 @@ namespace windows_service.lms.portal.kunindustries.com
             this.AutoLog = false;
             this.CanHandlePowerEvent = true;
             this.CanHandleSessionChangeEvent = true;
+            this.CanShutdown = true;
             this.ServiceName = "Portal LMS Service";
             ((System.ComponentModel.ISupportInitialize)(this.eventLog1)).EndInit();
 

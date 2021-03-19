@@ -9,11 +9,16 @@ using System.Threading.Tasks;
 namespace windows_service.lms.portal.kunindustries.com
 {
     [RunInstaller(true)]
-    public partial class Installer1 : System.Configuration.Install.Installer
+    public partial class ProjectInstaller : System.Configuration.Install.Installer
     {
-        public Installer1()
+        public ProjectInstaller()
         {
             InitializeComponent();
+        }
+
+        private void serviceProcessInstaller1_AfterInstall(object sender, InstallEventArgs e)
+        {
+
         }
     }
 }
